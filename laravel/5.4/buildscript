@@ -2,12 +2,12 @@
 cd
 
 echo Updating cache and installing binaries...
-apt-get update > /dev/null
-apt-get install wget zip unzip git -y > /dev/null
+apt-get update &> /dev/null
+apt-get install wget zip unzip git -y &> /dev/null
 
 echo Installing pdo_mysql...
-docker-php-ext-configure pdo_mysql > /dev/null
-docker-php-ext-install pdo_mysql > /dev/null
+docker-php-ext-configure pdo_mysql &> /dev/null
+docker-php-ext-install pdo_mysql &> /dev/null
 
 echo Installing composer...
 EXPECTED_SIGNATURE=$(wget https://composer.github.io/installer.sig -O - -q) > /dev/null
@@ -27,7 +27,7 @@ mv composer.phar /usr/bin/composer
 
 echo Installing nodejs and npm...
 cd /usr/local/share
-wget https://nodejs.org/dist/v7.6.0/node-v7.6.0-linux-x64.tar.xz > /dev/null
+wget https://nodejs.org/dist/v7.6.0/node-v7.6.0-linux-x64.tar.xz &> /dev/null
 tar xf node-v7.6.0-linux-x64.tar.xz > /dev/null
 mv node-v7.6.0-linux-x64 /usr/local/share/nodejs > /dev/null
 rm -f node-v7.6.0-linux-x64.tar.xz > /dev/null

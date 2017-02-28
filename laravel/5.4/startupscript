@@ -19,6 +19,10 @@ trap cleanup SIGTERM SIGHUP SIGINT
 tail -f /dev/null &
 pid="$!"
 
+if [ ! -d ~/$app_name ]; then
+	mkdir ~/$app_name
+fi
+
 cd ~/$app_name/
 
 count=$(php -r "print count(scandir('.'));")
