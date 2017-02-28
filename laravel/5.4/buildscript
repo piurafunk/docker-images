@@ -26,13 +26,10 @@ fi
 mv composer.phar /usr/bin/composer
 
 echo Installing nodejs and npm...
-cd /usr/local/share
-wget https://nodejs.org/dist/v7.6.0/node-v7.6.0-linux-x64.tar.xz &> /dev/null
-tar xf node-v7.6.0-linux-x64.tar.xz > /dev/null
-mv node-v7.6.0-linux-x64 /usr/local/share/nodejs > /dev/null
-rm -f node-v7.6.0-linux-x64.tar.xz > /dev/null
-ln -s /usr/local/share/nodejs/bin/node /usr/local/bin/node > /dev/null
-ln -s /usr/local/share/nodejs/bin/npm /usr/local/bin/npm > /dev/null
+wget https://nodejs.org/dist/v6.10.0/node-v6.10.0-linux-x64.tar.xz &> /dev/null
+tar xf node-v6.10.0-linux-x64.tar.xz > /dev/null
+mv node-v6.10.0-linux-x64 /usr/local/share/nodejs > /dev/null
+rm -f node-v6.10.0-linux-x64.tar.xz > /dev/null
 
 
 echo Installing laravel-echo-server...
@@ -42,3 +39,6 @@ echo Setting up php user...
 useradd php
 groupmod -g 1000 php
 chown php: /home/php -R
+
+echo Allowing PHP to bind to port 80...
+setcap 'cap_net_bind_service=+ep' $(which php)
