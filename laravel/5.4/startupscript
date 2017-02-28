@@ -1,0 +1,45 @@
+#!/bin/bash
+
+function cleanup {
+	if [ -n "$pid2" ]; then
+		kill -INT $pid2
+	fi
+	if [ -n "$pid3" ]; then
+		kill -INT $pid3
+	fi
+	if [ -n "$pid4" ]; then
+		kill -INT $pid4
+	fi
+	exit 0;
+	kill -INT $pid
+}
+
+trap cleanup SIGTERM SIGHUP SIGINT
+
+tail -f /dev/null &
+pid="$!"
+
+cd ~/$app_name/
+
+count=$(php -r "print count(scandir('.'));")
+if [ "$count" == "2" ]; then
+	composer create-project --prefer-dist laravel/laravel . "5.4.*"
+	npm install
+fi
+
+if [ -a webpack.mix.js ]; then
+	npm run watch &>> npm.log &
+	pid4="$!"
+fi
+
+if [ -a laravel-echo-server.json ]; then
+	laravel-echo-server start &>> laravel-echo-server.log &
+	pid2="$!"
+fi
+
+if [ -a artisan ]; then
+	php artisan serve --host $(hostname -i) --port 80 &>> serve.log &
+	pid3="$!"
+fi
+
+wait

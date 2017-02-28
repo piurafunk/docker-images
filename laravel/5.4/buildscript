@@ -1,0 +1,44 @@
+#!/bin/bash
+cd
+
+echo Updating cache and installing binaries...
+apt-get update > /dev/null
+apt-get install wget zip unzip git -y > /dev/null
+
+echo Installing pdo_mysql...
+docker-php-ext-configure pdo_mysql > /dev/null
+docker-php-ext-install pdo_mysql > /dev/null
+
+echo Installing composer...
+EXPECTED_SIGNATURE=$(wget https://composer.github.io/installer.sig -O - -q) > /dev/null
+php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');" > /dev/null
+ACTUAL_SIGNATURE=$(php -r "echo hash_file('SHA384', 'composer-setup.php');") > /dev/null
+
+if [ "$EXPECTED_SIGNATURE" = "$ACTUAL_SIGNATURE" ]
+then
+    php composer-setup.php --quiet
+    rm composer-setup.php
+else
+    >&2 echo 'ERROR: Invalid installer signature'
+    rm -f composer-setup.php
+    exit 1
+fi
+mv composer.phar /usr/bin/composer
+
+echo Installing nodejs and npm...
+cd /usr/local/share
+wget https://nodejs.org/dist/v7.6.0/node-v7.6.0-linux-x64.tar.xz > /dev/null
+tar xf node-v7.6.0-linux-x64.tar.xz > /dev/null
+mv node-v7.6.0-linux-x64 /usr/local/share/nodejs > /dev/null
+rm -f node-v7.6.0-linux-x64.tar.xz > /dev/null
+ln -s /usr/local/share/nodejs/bin/node /usr/local/bin/node > /dev/null
+ln -s /usr/local/share/nodejs/bin/npm /usr/local/bin/npm > /dev/null
+
+
+echo Installing laravel-echo-server...
+npm install laravel-echo-server -g > /dev/null
+
+echo Setting up php user...
+useradd php
+groupmod -g 1000 php
+chown php: /home/php -R
