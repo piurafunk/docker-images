@@ -1,6 +1,6 @@
-#!/bin/bash
+#!/bin/ash
 
-function cleanup {
+cleanup() {
 	if [ -n "$pid2" ]; then
 		kill -INT $pid2
 	fi
@@ -10,8 +10,8 @@ function cleanup {
 	if [ -n "$pid4" ]; then
 		kill -INT $pid4
 	fi
+	kill $pid
 	exit 0;
-	kill -INT $pid
 }
 
 trap cleanup SIGTERM SIGHUP SIGINT
@@ -31,18 +31,18 @@ if [ "$count" == "2" ]; then
 	npm install
 fi
 
-if [ -a webpack.mix.js ]; then
-	npm run watch &>> npm.log &
+if stat webpack.mix.js > /dev/null 2>&1 ; then
+	npm run watch >> npm.log 2>&1 &
 	pid4="$!"
 fi
 
-if [ -a laravel-echo-server.json ]; then
-	laravel-echo-server start &>> laravel-echo-server.log &
+if stat laravel-echo-server.json > /dev/null 2>&1 ; then
+	laravel-echo-server start >> laravel-echo-server.log 2>&1 &
 	pid2="$!"
 fi
 
-if [ -a artisan ]; then
-	php artisan serve --host $(hostname -i) --port 80 &>> serve.log &
+if stat artisan > /dev/null 2>&1 ; then
+	php artisan serve --host $(hostname -i) --port 80 >> serve.log 2>&1 &
 	pid3="$!"
 fi
 

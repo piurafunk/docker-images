@@ -1,16 +1,12 @@
-#!/bin/bash
+#!/bin/ash
 cd
 
-echo Updating cache and installing binaries...
-apt-get update &> /dev/null
-apt-get install wget zip unzip git -y &> /dev/null
-
-echo Installing pdo_mysql...
+echo " ---> Installing pdo_mysql..."
 docker-php-ext-configure pdo_mysql &> /dev/null
 docker-php-ext-install pdo_mysql &> /dev/null
 
-echo Installing composer...
-EXPECTED_SIGNATURE=$(wget https://composer.github.io/installer.sig -O - -q) > /dev/null
+echo " ---> Installing composer..."
+EXPECTED_SIGNATURE=$(curl https://composer.github.io/installer.sig -s) > /dev/null
 php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');" > /dev/null
 ACTUAL_SIGNATURE=$(php -r "echo hash_file('SHA384', 'composer-setup.php');") > /dev/null
 
@@ -18,27 +14,26 @@ if [ "$EXPECTED_SIGNATURE" = "$ACTUAL_SIGNATURE" ]
 then
     php composer-setup.php --quiet
     rm composer-setup.php
+    mv composer.phar /bin/composer
 else
-    >&2 echo 'ERROR: Invalid installer signature'
+    >&2 echo ' ---> ERROR: Invalid installer signature'
     rm -f composer-setup.php
     exit 1
 fi
-mv composer.phar /usr/bin/composer
 
-echo Installing nodejs and npm...
-wget https://nodejs.org/dist/v6.10.0/node-v6.10.0-linux-x64.tar.xz &> /dev/null
-tar xf node-v6.10.0-linux-x64.tar.xz > /dev/null
-mv node-v6.10.0-linux-x64 /usr/local/share/nodejs > /dev/null
-rm -f node-v6.10.0-linux-x64.tar.xz > /dev/null
+echo " ---> Installing nodejs and npm..."
+apk add nodejs --no-cache > /dev/null
 
-
-echo Installing laravel-echo-server...
+echo " ---> Installing laravel-echo-server..."
 npm install laravel-echo-server -g > /dev/null
 
-echo Setting up php user...
-useradd php
-groupmod -g 1000 php
-chown php: /home/php -R
+echo " ---> Setting UID and GID of www-data to 1000..."
+echo http://dl-2.alpinelinux.org/alpine/edge/community/ >> /etc/apk/repositories
+apk --no-cache add libcap > /dev/null
+apk --no-cache add shadow > /dev/null
+usermod -u 1000 www-data > /dev/null
+groupmod -g 1000 www-data > /dev/null
 
-echo Allowing PHP to bind to port 80...
-setcap 'cap_net_bind_service=+ep' $(which php)
+echo " ---> Allowing PHP to bind to port 80..."
+apk add --no-cache libcap > /dev/null
+setcap 'cap_net_bind_service=+ep' $(which php) > /dev/null
