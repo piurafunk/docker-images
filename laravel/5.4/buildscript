@@ -1,6 +1,10 @@
 #!/bin/ash
 cd
 
+echo " ---> Installing binaries..."
+apk add git --no-cache > /dev/null
+apk add openssh --no-cache > /dev/null
+
 echo " ---> Installing pdo_mysql..."
 docker-php-ext-configure pdo_mysql &> /dev/null
 docker-php-ext-install pdo_mysql &> /dev/null
