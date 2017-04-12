@@ -5,6 +5,6 @@ The base directory for the Laravel application is `/home/php`. This is also the 
 
 It is recommended to mount a volume, so that the files can be edited outside of the container, usually by an IDE (ie, PHPStorm).
 
-    -v /path/on/host:/home/php/APP_NAME_HERE
+    -v /path/on/host:/home/www-data/APP_NAME_HERE
 
 The app name specified in the volume mount should match the `app_name` environment variable.

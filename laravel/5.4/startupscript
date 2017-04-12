@@ -21,6 +21,7 @@ pid="$!"
 
 if [ ! -d ~/$app_name ]; then
 	mkdir ~/$app_name
+    chown www-data: ~/$app_name
 fi
 
 cd ~/$app_name/

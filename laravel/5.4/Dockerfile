@@ -7,4 +7,5 @@ RUN chmod +x /buildscript /startupscript
 RUN /buildscript
 ENV PATH $PATH:/usr/local/share/nodejs/bin
 USER www-data
+ENTRYPOINT ["/startupscript"]
 CMD ["/startupscript"]
