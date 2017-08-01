@@ -1,5 +1,5 @@
 # Laravel 5.4
-The base directory for the Laravel application is `/home/php`. This is also the current working directory when you `exec` into the container. The app name will determine the subdirectory that it is stored in (default: app). To change the directory, use the environment variable `app_name`:
+The base directory for the Laravel application is `/home/www-data/$app_name`. This is also the current working directory when you `exec` into the container. The app name will determine the subdirectory that it is stored in (default: app). To change the directory, use the environment variable `app_name`:
 
     -e app_name=APP_NAME_HERE
 
