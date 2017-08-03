@@ -2,12 +2,15 @@
 cd
 
 echo " ---> Installing binaries..."
-apk add git --no-cache > /dev/null
-apk add openssh --no-cache > /dev/null
+apk add git freetds-dev openssh nodejs libcap shadow --no-cache > /dev/null
 
 echo " ---> Installing pdo_mysql..."
 docker-php-ext-configure pdo_mysql &> /dev/null
 docker-php-ext-install pdo_mysql &> /dev/null
+docker-php-ext-enable pdo_mysql &> /dev/null
+docker-php-ext-configure pdo_dblib &> /dev/null
+docker-php-ext-install pdo_dblib &> /dev/null
+docker-php-ext-enable pdo_dblib &> /dev/null
 
 echo " ---> Installing composer..."
 EXPECTED_SIGNATURE=$(curl https://composer.github.io/installer.sig -s) > /dev/null
@@ -25,19 +28,13 @@ else
     exit 1
 fi
 
-echo " ---> Installing nodejs and npm..."
-apk add nodejs --no-cache > /dev/null
-
 echo " ---> Installing laravel-echo-server..."
 npm install laravel-echo-server -g > /dev/null
 
 echo " ---> Setting UID and GID of www-data to 1000..."
 echo http://dl-2.alpinelinux.org/alpine/edge/community/ >> /etc/apk/repositories
-apk --no-cache add libcap > /dev/null
-apk --no-cache add shadow > /dev/null
 usermod -u 1000 www-data > /dev/null
 groupmod -g 1000 www-data > /dev/null
 
 echo " ---> Allowing PHP to bind to port 80..."
-apk add --no-cache libcap > /dev/null
 setcap 'cap_net_bind_service=+ep' $(which php) > /dev/null
