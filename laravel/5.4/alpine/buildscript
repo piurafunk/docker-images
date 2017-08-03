@@ -2,6 +2,7 @@
 cd
 
 echo " ---> Installing binaries..."
+echo http://dl-2.alpinelinux.org/alpine/edge/community/ >> /etc/apk/repositories
 apk add git freetds-dev openssh nodejs libcap shadow --no-cache > /dev/null
 
 echo " ---> Installing pdo_mysql, pdo_dblib..."
@@ -32,7 +33,6 @@ echo " ---> Installing laravel-echo-server..."
 npm install laravel-echo-server -g > /dev/null
 
 echo " ---> Setting UID and GID of www-data to 1000..."
-echo http://dl-2.alpinelinux.org/alpine/edge/community/ >> /etc/apk/repositories
 usermod -u 1000 www-data > /dev/null
 groupmod -g 1000 www-data > /dev/null
 
