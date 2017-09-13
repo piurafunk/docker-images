@@ -2,10 +2,14 @@ FROM php:5.6-alpine
 ENV app_name=app
 WORKDIR /home/www-data/$app_name
 
-COPY buildscript startupscript /
-RUN chmod +x /buildscript /startupscript
+COPY buildscript /
+RUN chmod +x /buildscript
 RUN /buildscript
-ENV PATH $PATH:/usr/local/share/nodejs/bin
+
+COPY startupscript /
+RUN chmod +x /startupscript
+
 USER www-data
+ENV PATH $PATH:/usr/local/share/nodejs/bin
+
 ENTRYPOINT ["/startupscript"]
-CMD ["/startupscript"]

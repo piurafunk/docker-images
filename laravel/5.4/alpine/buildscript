@@ -1,7 +1,7 @@
 #!/bin/ash
 cd
 
-echo " ---> Installing binaries..."
+echo " ---> Installing binaries (git, freetds-dev, openssh, nodejs, libcap, shadow)..."
 echo http://dl-2.alpinelinux.org/alpine/edge/community/ >> /etc/apk/repositories
 apk add git freetds-dev openssh nodejs libcap shadow --no-cache > /dev/null
 
@@ -32,9 +32,9 @@ fi
 echo " ---> Installing laravel-echo-server..."
 npm install laravel-echo-server -g > /dev/null
 
-echo " ---> Setting UID and GID of www-data to 1000..."
-usermod -u 1000 www-data > /dev/null
-groupmod -g 1000 www-data > /dev/null
-
 echo " ---> Allowing PHP to bind to port 80..."
 setcap 'cap_net_bind_service=+ep' $(which php) > /dev/null
+
+echo " ---> Changing www-data uid & gid to 1000..."
+usermod -u 1000 www-data
+groupmod -g 1000 www-data

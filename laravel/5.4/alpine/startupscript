@@ -16,35 +16,35 @@ cleanup() {
 
 trap cleanup SIGTERM SIGHUP SIGINT
 
-tail -f /dev/null &
-pid="$!"
-
 if [ ! -d ~/$app_name ]; then
-	mkdir ~/$app_name
-    chown www-data: ~/$app_name
+        mkdir ~/$app_name
 fi
 
 cd ~/$app_name/
 
 count=$(php -r "print count(scandir('.'));")
 if [ "$count" == "2" ]; then
-	composer create-project --prefer-dist laravel/laravel . "5.4.*"
-	npm install
+        composer create-project --prefer-dist laravel/laravel . "5.4.*"
+	find -type d -exec chmod 755 {} \;
+        npm install
 fi
 
 if stat webpack.mix.js > /dev/null 2>&1 ; then
-	npm run watch >> npm.log 2>&1 &
-	pid4="$!"
+        npm run watch >> npm.log 2>&1 &
+        pid2="$!"
 fi
 
 if stat laravel-echo-server.json > /dev/null 2>&1 ; then
-	laravel-echo-server start >> laravel-echo-server.log 2>&1 &
-	pid2="$!"
+        laravel-echo-server start >> laravel-echo-server.log 2>&1 &
+        pid3="$!"
 fi
 
 if stat artisan > /dev/null 2>&1 ; then
-	php artisan serve --host $(hostname -i) --port 80 >> serve.log 2>&1 &
-	pid3="$!"
+        php artisan serve --host $(hostname -i) --port 80 >> serve.log 2>&1 &
+        pid4="$!"
 fi
+
+tail -f /dev/null &
+pid="$!"
 
 wait
