@@ -1,0 +1,41 @@
+#!/bin/ash
+cd
+
+echo " ---> Installing binaries (git, freetds-dev, openssh, nodejs, libcap, shadow)..."
+echo http://dl-2.alpinelinux.org/alpine/edge/community/ >> /etc/apk/repositories
+apk add git freetds-dev openssh nodejs libcap shadow --no-cache > /dev/null
+
+echo " ---> Installing pdo_mysql, pdo_dblib..."
+docker-php-ext-configure pdo_mysql &> /dev/null
+docker-php-ext-install pdo_mysql &> /dev/null
+docker-php-ext-enable pdo_mysql &> /dev/null
+docker-php-ext-configure pdo_dblib &> /dev/null
+docker-php-ext-install pdo_dblib &> /dev/null
+docker-php-ext-enable pdo_dblib &> /dev/null
+
+echo " ---> Installing composer..."
+EXPECTED_SIGNATURE=$(curl https://composer.github.io/installer.sig -s) > /dev/null
+php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');" > /dev/null
+ACTUAL_SIGNATURE=$(php -r "echo hash_file('SHA384', 'composer-setup.php');") > /dev/null
+
+if [ "$EXPECTED_SIGNATURE" = "$ACTUAL_SIGNATURE" ]
+then
+    php composer-setup.php --quiet
+    rm composer-setup.php
+    mv composer.phar /bin/composer
+else
+    >&2 echo ' ---> ERROR: Invalid installer signature'
+    rm -f composer-setup.php
+    exit 1
+fi
+
+echo " ---> Installing laravel-echo-server..."
+npm install laravel-echo-server -g > /dev/null
+
+echo " ---> Allowing PHP to bind to port 80..."
+setcap 'cap_net_bind_service=+ep' $(which php) > /dev/null
+
+echo " ---> Updating  www-data's uid, gid and permissions..."
+usermod -u 1000 www-data
+groupmod -g 1000 www-data
+chown www-data: ~www-data -R
