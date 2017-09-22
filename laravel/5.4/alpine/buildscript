@@ -1,9 +1,21 @@
 #!/bin/ash
+
 cd
 
-echo " ---> Installing binaries (git, freetds-dev, openssh, nodejs, libcap, shadow)..."
+#Add binaries here to have them displayed and installed
+set -- git freetds-dev openssh nodejs libcap shadow
+binariesToInstall=""
+
+echo -n " ---> Installing binaries ("
+while [ -n "$1" ]; do
+	echo -n "$1, "
+	binariesToInstall="$binariesToInstall $1"
+	shift
+done
+echo -ne "\033[1D"
+echo ")..."
 echo http://dl-2.alpinelinux.org/alpine/edge/community/ >> /etc/apk/repositories
-apk add git freetds-dev openssh nodejs libcap shadow --no-cache > /dev/null
+apk add $binariesToInstall --no-cache > /dev/null
 
 echo " ---> Installing pdo_mysql, pdo_dblib..."
 docker-php-ext-configure pdo_mysql &> /dev/null
@@ -35,6 +47,7 @@ npm install laravel-echo-server -g > /dev/null
 echo " ---> Allowing PHP to bind to port 80..."
 setcap 'cap_net_bind_service=+ep' $(which php) > /dev/null
 
-echo " ---> Changing www-data uid & gid to 1000..."
+echo " ---> Updating  www-data's uid, gid and permissions..."
 usermod -u 1000 www-data
 groupmod -g 1000 www-data
+chown www-data: ~www-data -R
