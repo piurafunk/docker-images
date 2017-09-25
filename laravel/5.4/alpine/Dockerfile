@@ -12,4 +12,6 @@ RUN chmod +x /startupscript
 USER www-data
 ENV PATH $PATH:/usr/local/share/nodejs/bin
 
+EXPOSE 80 443
+
 ENTRYPOINT ["/startupscript"]
