@@ -20,11 +20,11 @@ cleanup() {
 
 trap cleanup SIGTERM SIGHUP SIGINT
 
-if [ ! -d ~/$app_name ]; then
-        mkdir ~/$app_name
+if [ ! -d ~/app ]; then
+        mkdir ~/app
 fi
 
-cd ~/$app_name/
+cd ~/app/
 
 count=$(php -r "print count(scandir('.'));")
 if [ "$count" == "2" ]; then

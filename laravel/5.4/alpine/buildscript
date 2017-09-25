@@ -1,40 +1,52 @@
 #!/bin/ash
 
+print() {
+	if [ "$VERBOSE" == "TRUE" ]; then
+		read VAR
+		while [ "$VAR" ]; do
+			echo $VAR
+			read VAR
+		done
+	fi
+}
+
 cd
 
 #Add binaries here to have them displayed and installed
-set -- git freetds-dev openssh nodejs libcap shadow
+set -- git freetds-dev openssh nodejs libcap
 binariesToInstall=""
 
 echo -n " ---> Installing binaries ("
 while [ -n "$1" ]; do
-	echo -n "$1, "
+	echo -n "$1"
 	binariesToInstall="$binariesToInstall $1"
 	shift
+	if [ -n "$1" ]; then
+		echo -n ", ";
+	fi
 done
-echo -ne "\033[1D"
 echo ")..."
-echo http://dl-2.alpinelinux.org/alpine/edge/community/ >> /etc/apk/repositories
-apk add $binariesToInstall --no-cache > /dev/null
+#echo http://dl-2.alpinelinux.org/alpine/edge/community/ >> /etc/apk/repositories
+apk add $binariesToInstall --no-cache 2>&1 | print
 
 echo " ---> Installing pdo_mysql, pdo_dblib..."
-docker-php-ext-configure pdo_mysql &> /dev/null
-docker-php-ext-install pdo_mysql &> /dev/null
-docker-php-ext-enable pdo_mysql &> /dev/null
-docker-php-ext-configure pdo_dblib &> /dev/null
-docker-php-ext-install pdo_dblib &> /dev/null
-docker-php-ext-enable pdo_dblib &> /dev/null
+docker-php-ext-configure pdo_mysql 2>&1 | print
+docker-php-ext-install pdo_mysql 2>&1 | print
+docker-php-ext-enable pdo_mysql 2>&1 | print
+docker-php-ext-configure pdo_dblib 2>&1 | print
+docker-php-ext-install pdo_dblib 2>&1 | print
+docker-php-ext-enable pdo_dblib 2>&1 | print
 
 echo " ---> Installing composer..."
-EXPECTED_SIGNATURE=$(curl https://composer.github.io/installer.sig -s) > /dev/null
-php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');" > /dev/null
-ACTUAL_SIGNATURE=$(php -r "echo hash_file('SHA384', 'composer-setup.php');") > /dev/null
+EXPECTED_SIGNATURE=$(curl https://composer.github.io/installer.sig -s) 2>&1  | print
+php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');" 2>&1 | print
+ACTUAL_SIGNATURE=$(php -r "echo hash_file('SHA384', 'composer-setup.php');") 2>&1 | print
 
 if [ "$EXPECTED_SIGNATURE" = "$ACTUAL_SIGNATURE" ]
 then
-    php composer-setup.php --quiet
-    rm composer-setup.php
-    mv composer.phar /bin/composer
+    php composer-setup.php 2>&1 | print
+    rm composer-setup.php 2>&1 | print
+    mv composer.phar /bin/composer 2>&1 | print
 else
     >&2 echo ' ---> ERROR: Invalid installer signature'
     rm -f composer-setup.php
@@ -42,12 +54,12 @@ else
 fi
 
 echo " ---> Installing laravel-echo-server..."
-npm install laravel-echo-server -g > /dev/null
+npm install laravel-echo-server -g 2>&1 | print
 
 echo " ---> Allowing PHP to bind to port 80..."
-setcap 'cap_net_bind_service=+ep' $(which php) > /dev/null
+setcap 'cap_net_bind_service=+ep' $(which php) 2>&1 | print
 
-echo " ---> Updating  www-data's uid, gid and permissions..."
-usermod -u 1000 www-data
-groupmod -g 1000 www-data
-chown www-data: ~www-data -R
+echo " ---> Removing user 'www-data' and adding user 'laravel'..."
+deluser --remove-home www-data
+adduser -Du ${UID} laravel
+chown laravel: /home/laravel -R
