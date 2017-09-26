@@ -31,6 +31,7 @@ apk add $binariesToInstall --no-cache 2>&1 | print
 
 #Add php extensions here
 set -- pdo_mysql pdo_dblib
+extensionsToInstall=""
 
 echo -n " ---> Installing "
 while [ -n "$1" ]; do
@@ -45,9 +46,9 @@ echo "..."
 
 set -- $extensionsToInstall
 while [ -n "$1" ]; do
-	docker-php-ext-configure $1 2>&1 | print
-	docker-php-ext-install $1 2>&1 | print
-	docker-php-ext-enable $1 2>&1 | print
+	docker-php-ext-configure $1 | print
+	docker-php-ext-install $1 | print
+	docker-php-ext-enable $1 | print
 	shift
 done
 
