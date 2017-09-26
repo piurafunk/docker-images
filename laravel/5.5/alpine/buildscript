@@ -58,7 +58,7 @@ ACTUAL_SIGNATURE=$(php -r "echo hash_file('SHA384', 'composer-setup.php');") 2>&
 
 if [ "$EXPECTED_SIGNATURE" = "$ACTUAL_SIGNATURE" ]
 then
-    php composer-setup.php --install-dir=/usr/bin --filename=composer 2>&1 | print
+    php composer-setup.php --install-dir=/usr/bin --filename=composer > /dev/null
     rm -f composer-setup.php 2>&1 | print
 else
     >&2 echo ' ---> ERROR: Invalid installer signature'
@@ -66,7 +66,7 @@ else
 fi
 
 echo " ---> Installing laravel-echo-server..."
-npm install laravel-echo-server -g | print
+npm install laravel-echo-server -g 2>&1 | print
 
 echo " ---> Allowing PHP to bind to port 80..."
 setcap 'cap_net_bind_service=+ep' $(which php) 2>&1 | print

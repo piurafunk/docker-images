@@ -29,13 +29,27 @@ echo ")..."
 #echo http://dl-2.alpinelinux.org/alpine/edge/community/ >> /etc/apk/repositories
 apk add $binariesToInstall --no-cache 2>&1 | print
 
-echo " ---> Installing pdo_mysql, pdo_dblib..."
-docker-php-ext-configure pdo_mysql 2>&1 | print
-docker-php-ext-install pdo_mysql 2>&1 | print
-docker-php-ext-enable pdo_mysql 2>&1 | print
-docker-php-ext-configure pdo_dblib 2>&1 | print
-docker-php-ext-install pdo_dblib 2>&1 | print
-docker-php-ext-enable pdo_dblib 2>&1 | print
+#Add php extensions here
+set -- pdo_mysql pdo_dblib
+
+echo -n " ---> Installing "
+while [ -n "$1" ]; do
+	echo -n "$1"
+	extensionsToInstall="$extenstionsToInstall $1"
+	shift
+	if [ -n "$1" ]; then
+		echo -n ", "
+	fi
+done
+echo "..."
+
+set -- $extensionsToInstall
+while [ -n "$1" ]; do
+	docker-php-ext-configure $1 2>&1 | print
+	docker-php-ext-install $1 2>&1 | print
+	docker-php-ext-enable $1 2>&1 | print
+	shift
+done
 
 echo " ---> Installing composer..."
 EXPECTED_SIGNATURE=$(curl https://composer.github.io/installer.sig -s) 2>&1  | print
@@ -44,12 +58,10 @@ ACTUAL_SIGNATURE=$(php -r "echo hash_file('SHA384', 'composer-setup.php');") 2>&
 
 if [ "$EXPECTED_SIGNATURE" = "$ACTUAL_SIGNATURE" ]
 then
-    php composer-setup.php 2>&1 | print
-    rm composer-setup.php 2>&1 | print
-    mv composer.phar /bin/composer 2>&1 | print
+    php composer-setup.php --install-dir=/usr/bin --filename=composer > /dev/null
+    rm -f composer-setup.php 2>&1 | print
 else
     >&2 echo ' ---> ERROR: Invalid installer signature'
-    rm -f composer-setup.php
     exit 1
 fi
 
@@ -62,4 +74,6 @@ setcap 'cap_net_bind_service=+ep' $(which php) 2>&1 | print
 echo " ---> Removing user 'www-data' and adding user 'laravel'..."
 deluser --remove-home www-data
 adduser -Du ${UID} laravel
+mkdir -p /home/laravel/.ssh
+echo -e "Host *\n\tStrictHostKeyChecking no\n\tUserKnownHostsFile=/dev/null" >> /home/laravel/.ssh/config
 chown laravel: /home/laravel -R
