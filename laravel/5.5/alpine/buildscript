@@ -36,7 +36,7 @@ extensionsToInstall=""
 echo -n " ---> Installing "
 while [ -n "$1" ]; do
 	echo -n "$1"
-	extensionsToInstall="$extenstionsToInstall $1"
+	extensionsToInstall="$extensionsToInstall $1"
 	shift
 	if [ -n "$1" ]; then
 		echo -n ", "
@@ -46,9 +46,9 @@ echo "..."
 
 set -- $extensionsToInstall
 while [ -n "$1" ]; do
-	docker-php-ext-configure $1 | print
-	docker-php-ext-install $1 | print
-	docker-php-ext-enable $1 | print
+	docker-php-ext-configure $1
+	docker-php-ext-install $1
+	docker-php-ext-enable $1
 	shift
 done
 
