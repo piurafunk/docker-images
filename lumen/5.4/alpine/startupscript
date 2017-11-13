@@ -1,0 +1,57 @@
+#!/bin/ash
+
+cleanup() {
+	if [ -n "$npmPid" ]; then
+		kill -INT $npmPid
+	fi
+	if [ -n "$echoServerPid" ]; then
+		kill -INT $echoServerPid
+	fi
+	if [ -n "$servePid" ]; then
+		kill -INT $servePid
+	fi
+	if [ -n "$queueWorkerPid" ]; then
+		kill -INT $queueWorkerPid
+	fi
+
+	kill $tailPid
+	exit 0;
+}
+
+trap cleanup SIGTERM SIGHUP SIGINT
+
+if [ ! -d ~/app ]; then
+        mkdir ~/app
+fi
+
+cd ~/app/
+
+count=$(php -r "print count(scandir('.'));")
+if [ "$count" == "2" ]; then
+        composer create-project --prefer-dist laravel/laravel . "5.4.*"
+	find -type d -exec chmod 755 {} \;
+        npm install
+fi
+
+if stat webpack.mix.js > /dev/null 2>&1 ; then
+        npm run watch >> storage/logs/npm.log 2>&1 &
+        npmPid="$!"
+fi
+
+if stat laravel-echo-server.json > /dev/null 2>&1 ; then
+        laravel-echo-server start >> storage/logs/echo-server.log 2>&1 &
+        echoServerPid="$!"
+fi
+
+if stat artisan > /dev/null 2>&1 ; then
+        php -S $(hostname -i):80 -t public >> storage/logs/serve.log 2>&1 &
+        servePid="$!"
+fi
+
+php artisan queue:listen --timeout=0 >> storage/logs/queue_worker.log 2>&1 &
+queueWorkerPid="$!"
+
+tail -f /dev/null &
+tailPid="$!"
+
+wait
