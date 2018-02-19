@@ -15,6 +15,8 @@ RUN     echo -e "[perforce]\nname=Perforce\nbaseurl=http://package.perforce.com/
         # Set up default protection rules
         p4 -p localhost:1666 protect -o | p4 -p localhost:1666 protect -i
 
+ENV	P4SSLDIR /opt/perforce/ssl
+
 WORKDIR /opt/perforce
 ADD     entrypoint.sh /entrypoint.sh
 
