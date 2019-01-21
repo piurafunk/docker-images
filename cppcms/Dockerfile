@@ -57,3 +57,5 @@ RUN     apt-get update && apt-get -y install \
             libicu-dev \
             libpcre3-dev \
             zlib1g-dev
+
+EXPOSE 8080
