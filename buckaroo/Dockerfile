@@ -35,6 +35,7 @@ RUN     wget https://github.com/njlr/buck-warp/releases/download/v0.3.0/buck-201
 
 ## Setup for Buckaroo
 RUN     apt-get update && apt-get install -y \
+            git \
             libssl1.0.0 && \
         rm -rf /var/lib/apt/lists/*
 
