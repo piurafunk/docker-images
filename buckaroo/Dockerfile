@@ -40,8 +40,8 @@ RUN     apt-get update && apt-get install -y \
         rm -rf /var/lib/apt/lists/*
 
 ## Install Buckaroo
-RUN	wget https://github.com/LoopPerfect/buckaroo/releases/download/v2.2.0/buckaroo-linux -O /bin/buckaroo && \
-	chmod +x /bin/buckaroo
+RUN	    wget https://github.com/LoopPerfect/buckaroo/releases/download/v2.2.0/buckaroo-linux -O /bin/buckaroo && \
+	    chmod +x /bin/buckaroo
 
 ## Add FCGI
 RUN apt-get update && apt-get install -y \
