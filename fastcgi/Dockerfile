@@ -1,10 +1,8 @@
-FROM	alpine:3.9.2 as build
+FROM	ubuntu:18.04 as build
 
-RUN	apk add --no-cache \
-        entr \
-        fcgi-dev \
+RUN	apt-get update && apt-get install -y \
+        libfcgi-dev \
         gdb \
-        libc6-compat \
-        the_silver_searcher
+        libc6
 
 CMD gdbserver 0.0.0.0:2000 ./app
