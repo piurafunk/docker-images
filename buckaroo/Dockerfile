@@ -4,13 +4,22 @@ RUN     git clone --depth 1 --branch v4.9.0 https://github.com/facebook/watchman
 FROM    piurafunk/utility-git as buck-src
 RUN     git clone --depth 1 --branch v2019.01.10.01 https://github.com/facebook/buck.git /buck
 
+FROM    piurafunk/utility-git as tbb-src
+RUN     git clone --depth 1 --branch tbb_2019 https://github.com/intel/tbb.git /tbb
+
 FROM    ubuntu:18.04 as build
+
+RUN     apt-get update && apt-get install -y \
+            software-properties-common && \
+        rm -rf /var/lib/apt/lists/*
+
+RUN     add-apt-repository -y ppa:jonathonf/gcc-9.1
 
 ## Setup for Watchman
 RUN     apt-get update && apt-get install -y \
             autoconf \
             automake \
-            g++ \
+            g++-9 \
             libssl-dev \
             libtool \
             make \
@@ -42,6 +51,13 @@ RUN     apt-get update && apt-get install -y \
 ## Install Buckaroo
 RUN	    wget https://github.com/LoopPerfect/buckaroo/releases/download/v2.2.0/buckaroo-linux -O /bin/buckaroo && \
 	    chmod +x /bin/buckaroo
+
+## Install TBB
+COPY    --from=tbb-src /tbb /tbb
+RUN     cd /tbb && make -j `nproc` tbb tbbmalloc tbbproxy && \
+        cp -r /tbb/include/tbb /usr/include && \
+        cp /tbb/build/linux_intel64_gcc_cc7.4.0_libc2.27_kernel4.9.125_release/*.so /tbb/build/linux_intel64_gcc_cc7.4.0_libc2.27_kernel4.9.125_release/*.so.2 /lib/x86_64-linux-gnu && \
+        rm -r /tbb
 
 ## Add FCGI
 RUN apt-get update && apt-get install -y \
