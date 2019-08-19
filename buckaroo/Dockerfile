@@ -16,6 +16,8 @@ RUN     apt-get update && apt-get install -y \
 RUN     add-apt-repository -y ppa:jonathonf/gcc-9.1
 
 ## Setup for Watchman
+RUN     apt update -y && apt install -y software-properties-common && rm -rf /var/lib/apt/lists/*
+RUN     add-apt-repository ppa:jonathonf/gcc-9.1
 RUN     apt-get update && apt-get install -y \
             autoconf \
             automake \

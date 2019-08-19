@@ -4,9 +4,6 @@ RUN     git clone --depth 1 https://github.com/facebook/buck.git /buck
 FROM    piurafunk/utility-git as watchman-src
 RUN     git clone --depth 1 --branch v4.9.0 https://github.com/facebook/watchman.git /watchman
 
-FROM    piurafunk/utility-git as buckaroo-src
-RUN     git clone --depth 1 https://github.com/LoopPerfect/buckaroo.git /buckaroo
-
 FROM    piurafunk/utility-git as cppcms-src
 RUN     git clone --depth 1 https://github.com/artyom-beilis/cppcms.git /cppcms
 
@@ -39,17 +36,9 @@ COPY    --from=buck-src /buck /buck
 RUN     cd /buck && ant && ./bin/buck build --show-output buck
 ENV     PATH="$PATH:/buck/bin"
 
-## Setup for Buckaroo
-RUN     apt-get update && apt-get -y install \
-            cmake \
-            zip
-
 ## Install Buckaroo
-COPY    --from=buckaroo-src /buckaroo /buckaroo
-RUN     cd /buckaroo && buck build :buckaroo-cli
-
-## Create bash wrapper for buckaroo .jar
-RUN     echo -e "#!/bin/bash\njava -jar \"/buckaroo/buck-out/gen/buckaroo-cli.jar\" \$@" > /bin/buckaroo && chmod +x /bin/buckaroo
+RUN	wget https://github.com/LoopPerfect/buckaroo/releases/download/buckaroo-redux-alpha-6/buckaroo-linux -O /bin/buckaroo && \
+	chmod +x /bin/buckaroo
 
 ## Setup for CppCms
 RUN     apt-get update && apt-get -y install \
