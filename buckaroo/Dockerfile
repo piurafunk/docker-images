@@ -58,7 +58,14 @@ RUN	    wget https://github.com/LoopPerfect/buckaroo/releases/download/v2.2.0/bu
 COPY    --from=tbb-src /tbb /tbb
 RUN     cd /tbb && make -j `nproc` tbb tbbmalloc tbbproxy && \
         cp -r /tbb/include/tbb /usr/include && \
-        cp /tbb/build/linux_intel64_gcc_cc7.4.0_libc2.27_kernel4.9.125_release/*.so /tbb/build/linux_intel64_gcc_cc7.4.0_libc2.27_kernel4.9.125_release/*.so.2 /lib/x86_64-linux-gnu && \
+        OS=`uname | tr '[:upper:]' '[:lower:]'` && \
+        case $(uname -m) in "x86_64") ARCH=intel64 ;; "i686") ARCH=ia32 ;; "ia64") ARCH=ia64 ;; "sparc64") ARCH=sparc ;; "armv7l") ARCH=armv7 ;; *) ARCH=$(uname -m) ;; esac && \
+        COMPILER_NAME="gcc_cc`gcc --version | grep ^gcc | sed 's/^.* //g'`" && \
+        RUNTIME="libc`ldd --version | grep ^ldd | sed 's/^.* //g'`" && \
+        KERNEL="kernel`uname -r | cut -f1 -d"-"`" && \
+        cp /tbb/build/${OS}_${ARCH}_${COMPILER_NAME}_${RUNTIME}_${KERNEL}_release/*.so \
+            /tbb/build/${OS}_${ARCH}_${COMPILER_NAME}_${RUNTIME}_${KERNEL}_release/*.so.2 \
+            /lib/x86_64-linux-gnu && \
         rm -r /tbb
 
 ## Add FCGI
