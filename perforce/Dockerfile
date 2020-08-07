@@ -7,7 +7,7 @@ RUN     echo -e "[perforce]\nname=Perforce\nbaseurl=http://package.perforce.com/
         # Install the Helix Server binary
         yum install helix-p4d -y && \
 	# Move binaries into /usr/bin and /usr/sbin folders
-	cp --remove-destination /opt/perforce/bin/p4 /usr/bin/p4 && cp --remove-destination /opt/perforce/sbin/p4d.17.2 /usr/sbin/p4d && \
+	cp --remove-destination /opt/perforce/bin/p4 /usr/bin/p4 && cp --remove-destination /etc/alternatives/helix-p4d /usr/sbin/p4d && \
         # Change ownership of all Perforce related directories to those of the 'perforce' user
         chown perforce:perforce /opt/perforce -R && \
         # Start the server in the background
